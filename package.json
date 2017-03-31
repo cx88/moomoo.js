@@ -1,0 +1,30 @@
+{
+  "name": "moomoo.js",
+  "version": "0.0.0",
+  "author": "CX <cx8128@gmail.com>",
+  "main": "./index.js",
+  "description": "Simple bot API for MooMoo.io",
+  "contributors": [
+    {
+      "name": "CX",
+      "email": "cx8128@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:cx88/moomoo.js.git"
+  },
+  "keywords": [
+    "bot framework"
+  ],
+  "dependencies": {
+    "socket.io-client": "^1.7.2"
+  },
+  "engine": "node >= 6.0.x",
+  "homepage": "https://github.com/cx88/moomoo.js",
+  "bugs": {
+    "url": "https://github.com/cx88/moomoo.js/issues"
+  },
+  "private": false,
+  "license": "Apache License 2.0"
+}
