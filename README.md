@@ -6,6 +6,8 @@ Note that this is **not** an AI library, only the endpoint.
 
 ## Installation
 
+Do `npm install -s moomoo.js` to install with NPM.
+
 ## Organization
 
 The structure of a simple multiboxing bot can be as follow:

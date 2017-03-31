@@ -193,8 +193,8 @@
     remove(a) {
       var p = this.bids[a];
       if (!p) { return; }
-      this.bids[p.id] = null;
-      this.bsids[p.sid] = null;
+      delete this.bids[p.id];
+      delete this.bsids[p.sid];
     }
     listen(sk, o) {
       sk.on("2", (a, s) => this.add(a, o, s));
