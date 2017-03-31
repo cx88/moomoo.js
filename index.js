@@ -168,6 +168,16 @@
       this.bsids = {};
       this.bids = {};
     }
+    lookup(obj) {
+      if (!("id" in obj.id) && !("sid" in obj.id)) { return {}; }
+      var cur = this.bids[obj.id] || this.bsids[obj.sid];
+      if (!cur) {
+        cur = new Player(this, "" , [obj.id, obj.sid]);
+        if (obj.sid) { this.bsids[obj.sid] = cur; }
+        if (obj.id) { this.bids[obj.id] = cur; }
+      }
+      for (var i in obj) { cur[i] = obj[i]; }
+    }
     add(a, o, k) {
       var r = this.bids[a[0]];
       if (r) {
@@ -183,6 +193,9 @@
         super.emit("ctrler", r);
       }
       return this.bids[a[0]] = this.bsids[a[1]] = new Player(this, o, a);
+    }
+    single(r) {
+      this.bsids[r.sid].update("", r.x, r.y);
     }
     update(a, o) {
       for (var i in this.bsids) { this.bsids[i].visible[o] = false; }
@@ -202,6 +215,22 @@
       sk.on("4", a => this.remove(a));
     }
   };
+  var Alliance = $.alliance = class extends ee {
+    constructor(inter) {
+      super();
+      this.inter = inter;
+      this.members = [];
+      inter.socket.on("an", (a, c) => {
+        super.emit("ask", inter.moo.pms.lookup({
+          sid: a,
+          name: c
+        }));
+      });
+    }
+    kick(id) {
+      
+    }
+  };
   var Interface = $.interface = class extends ee {
     constructor(c, o) {
       super();
@@ -212,6 +241,8 @@
       this.ctrl = null;
       this.sid = null;
       this.socket = c.socket;
+      this.alliance = null;
+      this.friends = [];
       this.track();
     }
     track() {
@@ -221,30 +252,42 @@
       });
       sk.on("1", sid => {
         if (!this.sid) {
-          this.moo.pms.on("ctrler", r => {
-            if (r.sid != sid) {
-              console.log(r);
-              console.log(sid);
-              return;
-            }
-            console.log("Good");
+          var q = r => {
+            if (r.sid != sid) { return; }
+            this.moo.pms.removeListener("ctrler", q);
             super.emit("spawn", r);
-          });
+          };
+          this.moo.pms.on("ctrler", q);
         }
         this.id = sid;
       });
+      sk.on("st", d => {
+        this.alliance = new Alliance(d);
+        super.emit("ally", this.alliance);
+      });
+      sk.on("sa", d => this.friends = d);
     }
     spawn(name) {
       this.socket.emit("1", name || this.opt.name);
       return new Promise((accept) => {
-        super.on("spawn", r => accept(r));
+        super.once("spawn", r => accept(r));
       });
     }
-    join() {}
-    create() {}
+    join(n) { this.socket.emit("10", n); }
+    create(n) {
+      this.socket.emit("8", n);
+      return new Promise((accept) => {
+        var q = r => {
+          this.moo.pms.removeListener("ally", q);
+          accept(r);
+        };
+        this.moo.pms.on("ally", q);
+      });
+    }
   };
-  var Alliances = $.alliances = class {
+  var Alliances = $.alliances = class extends ee {
     constructor(moo) {
+      super();
       this.moo = moo;
       this.all = [];
     }
